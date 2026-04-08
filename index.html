@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SportKnow — Ask Anything. Know Everything.</title>
+<meta name="description" content="AI-powered sports stats for NFL, NBA, and NHL. Ask any question about players, seasons, and records — get instant answers.">
+<meta property="og:title" content="SportKnow — Ask Anything. Know Everything.">
+<meta property="og:description" content="AI-powered sports stats for NFL, NBA, and NHL.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #12121a;
+    --bg3: #1a1a26;
+    --surface: #1e1e2e;
+    --surface2: #252535;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0f0f8;
+    --text2: #9090b0;
+    --text3: #5a5a7a;
+    --accent: #4f8ef7;
+    --accent2: #6fa3ff;
+    --nfl: #d4380d;
+    --nba: #c9a227;
+    --nhl: #3a9fd4;
+    --glow: rgba(79,142,247,0.15);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; opacity: 0.4;
+  }
+
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(79,142,247,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,142,247,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none; z-index: 0;
+  }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .logo {
+    font-family: var(--font-display);
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .logo span { color: var(--accent); }
+
+  .nav-leagues { display: flex; gap: 4px; }
+  .nav-league {
+    padding: 5px 14px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    color: var(--text2);
+    border: 1px solid transparent;
+    background: transparent;
+    transition: all 0.2s;
+    font-family: var(--font-body);
+  }
+  .nav-league:hover { color: var(--text); border-color: var(--border2); }
+  .nav-league.active.nfl { color: var(--nfl); border-color: var(--nfl); background: rgba(212,56,13,0.08); }
+  .nav-league.active.nba { color: var(--nba); border-color: var(--nba); background: rgba(201,162,39,0.08); }
+  .nav-league.active.nhl { color: var(--nhl); border-color: var(--nhl); background: rgba(58,159,212,0.08); }
+
+  .nav-status {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--text3);
+  }
+  .status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #3fba74;
+    box-shadow: 0 0 6px #3fba74;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .hero {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 100px 24px 60px;
+    text-align: center;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.1s forwards;
+  }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(64px, 10vw, 120px);
+    line-height: 0.9;
+    letter-spacing: 4px;
+    color: var(--text);
+    margin-bottom: 6px;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.2s forwards;
+  }
+  .hero-title .accent { color: var(--accent); }
+  .hero-title .dim { color: var(--text3); }
+
+  .hero-sub {
+    font-size: 16px;
+    color: var(--text2);
+    max-width: 480px;
+    line-height: 1.6;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.35s forwards;
+    font-weight: 300;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .league-tabs {
+    display: flex; gap: 8px; margin-bottom: 24px;
+    opacity: 0; animation: fadeUp 0.7s 0.45s forwards;
+  }
+  .league-tab {
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    background: var(--surface);
+    transition: all 0.2s;
+    font-family: var(--font-body);
+  }
+  .league-tab.nfl.active { background: rgba(212,56,13,0.15); border-color: var(--nfl); color: var(--nfl); }
+  .league-tab.nba.active { background: rgba(201,162,39,0.15); border-color: var(--nba); color: var(--nba); }
+  .league-tab.nhl.active { background: rgba(58,159,212,0.15); border-color: var(--nhl); color: var(--nhl); }
+  .league-tab:hover:not(.active) { border-color: var(--border2); color: var(--text); background: var(--surface2); }
+
+  .search-container {
+    width: 100%; max-width: 680px;
+    opacity: 0; animation: fadeUp 0.7s 0.5s forwards;
+  }
+
+  .search-box {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 14px 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-box:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--glow), 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .search-icon { color: var(--text3); flex-shrink: 0; }
+
+  #searchInput {
+    flex: 1;
+    background: transparent;
+    border: none; outline: none;
+    font-family: var(--font-body);
+    font-size: 16px;
+    color: var(--text);
+    caret-color: var(--accent);
+  }
+  #searchInput::placeholder { color: var(--text3); }
+
+  .ask-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-body);
+    letter-spacing: 0.3px;
+    transition: background 0.2s, transform 0.1s;
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .ask-btn:hover { background: var(--accent2); }
+  .ask-btn:active { transform: scale(0.97); }
+  .ask-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .chips {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: 16px; justify-content: center;
+  }
+  .chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: var(--font-mono);
+  }
+  .chip:hover { border-color: var(--accent); color: var(--accent); background: rgba(79,142,247,0.08); }
+
+  .result-area {
+    width: 100%; max-width: 680px;
+    margin-top: 24px;
+  }
+
+  .loading-state { display: none; padding: 32px; text-align: center; }
+  .loading-state.show { display: block; }
+  .loading-dots { display: inline-flex; gap: 6px; align-items: center; }
+  .loading-dots span {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    animation: bounce 1.2s infinite;
+  }
+  .loading-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce {
+    0%,80%,100%{ transform: scale(0.6); opacity: 0.4; }
+    40%{ transform: scale(1); opacity: 1; }
+  }
+  .loading-text { margin-top: 12px; font-size: 13px; color: var(--text3); font-family: var(--font-mono); }
+
+  .result-card { display: none; background: var(--surface); border: 1px solid var(--border2); border-radius: 16px; overflow: hidden; animation: fadeUp 0.4s forwards; }
+  .result-card.show { display: block; }
+
+  .result-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .result-query { font-family: var(--font-mono); font-size: 12px; color: var(--text2); flex: 1; }
+  .result-query strong { color: var(--text); }
+  .league-badge { font-size: 11px; font-weight: 600; letter-spacing: 1px; padding: 3px 10px; border-radius: 4px; }
+  .badge-nfl { background: rgba(212,56,13,0.2); color: var(--nfl); border: 1px solid rgba(212,56,13,0.3); }
+  .badge-nba { background: rgba(201,162,39,0.2); color: var(--nba); border: 1px solid rgba(201,162,39,0.3); }
+  .badge-nhl { background: rgba(58,159,212,0.2); color: var(--nhl); border: 1px solid rgba(58,159,212,0.3); }
+
+  .result-body { padding: 20px; }
+
+  .player-row { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+  .player-avatar { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 20px; letter-spacing: 1px; flex-shrink: 0; }
+  .avatar-nfl { background: rgba(212,56,13,0.2); color: var(--nfl); border: 1px solid rgba(212,56,13,0.3); }
+  .avatar-nba { background: rgba(201,162,39,0.2); color: var(--nba); border: 1px solid rgba(201,162,39,0.3); }
+  .avatar-nhl { background: rgba(58,159,212,0.2); color: var(--nhl); border: 1px solid rgba(58,159,212,0.3); }
+
+  .player-name { font-size: 20px; font-weight: 600; color: var(--text); }
+  .player-meta { font-size: 13px; color: var(--text2); margin-top: 2px; }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+  .stat-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 14px; transition: border-color 0.2s; }
+  .stat-card:hover { border-color: var(--border2); }
+  .stat-label { font-size: 11px; color: var(--text3); font-family: var(--font-mono); letter-spacing: 0.5px; margin-bottom: 6px; text-transform: uppercase; }
+  .stat-val { font-family: var(--font-display); font-size: 32px; letter-spacing: 1px; line-height: 1; color: var(--text); }
+  .stat-val.accent { color: var(--accent); }
+  .stat-sub { font-size: 11px; color: var(--text3); margin-top: 4px; font-family: var(--font-mono); }
+
+  .result-source { padding: 12px 20px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text3); font-family: var(--font-mono); }
+
+  .ai-insight { margin-top: 12px; padding: 14px 16px; background: rgba(79,142,247,0.06); border: 1px solid rgba(79,142,247,0.15); border-radius: 10px; font-size: 14px; color: var(--text2); line-height: 1.6; font-style: italic; }
+  .ai-insight-label { font-size: 10px; font-family: var(--font-mono); letter-spacing: 2px; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; font-style: normal; }
+
+  .error-state { display: none; padding: 20px; text-align: center; color: #f87171; font-size: 14px; background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.2); border-radius: 12px; }
+  .error-state.show { display: block; }
+
+  .how-section { position: relative; z-index: 1; padding: 80px 24px; max-width: 900px; margin: 0 auto; }
+  .section-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; margin-bottom: 16px; }
+  .section-title { font-family: var(--font-display); font-size: 48px; letter-spacing: 2px; margin-bottom: 48px; color: var(--text); }
+  .how-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .how-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; transition: border-color 0.2s, transform 0.2s; }
+  .how-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .how-num { font-family: var(--font-display); font-size: 48px; color: var(--border2); letter-spacing: 2px; line-height: 1; margin-bottom: 12px; }
+  .how-card h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .how-card p { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+  footer { position: relative; z-index: 1; border-top: 1px solid var(--border); padding: 24px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .footer-logo { font-family: var(--font-display); font-size: 22px; letter-spacing: 2px; color: var(--text3); }
+  .footer-logo span { color: var(--accent); }
+  .footer-links { display: flex; gap: 20px; }
+  .footer-links a { font-size: 12px; color: var(--text3); text-decoration: none; }
+  .footer-links a:hover { color: var(--text2); }
+
+  .history { width: 100%; max-width: 680px; margin-top: 8px; }
+  .history-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: background 0.15s; font-size: 13px; color: var(--text2); }
+  .history-item:hover { background: var(--surface); color: var(--text); }
+
+  @media (max-width: 600px) {
+    .hero-title { font-size: 56px; }
+    nav { padding: 0 16px; }
+    .nav-leagues { display: none; }
+    footer { flex-direction: column; gap: 12px; text-align: center; }
+    .how-section { padding: 60px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#">Sport<span>Know</span></a>
+  <div class="nav-leagues">
+    <button class="nav-league nfl active" onclick="setLeague('NFL',this)">NFL</button>
+    <button class="nav-league nba" onclick="setLeague('NBA',this)">NBA</button>
+    <button class="nav-league nhl" onclick="setLeague('NHL',this)">NHL</button>
+  </div>
+  <div class="nav-status">
+    <div class="status-dot"></div>
+    <span>Live Stats</span>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow">AI-Powered Sports Intelligence</div>
+  <h1 class="hero-title">ASK <span class="accent">ANY</span><span class="dim">THING</span></h1>
+  <p class="hero-sub">Type any question about NFL, NBA, or NHL players — stats, records, career numbers — and get instant answers.</p>
+
+  <div class="league-tabs">
+    <button class="league-tab nfl active" onclick="setLeague('NFL',this)">NFL</button>
+    <button class="league-tab nba" onclick="setLeague('NBA',this)">NBA</button>
+    <button class="league-tab nhl" onclick="setLeague('NHL',this)">NHL</button>
+  </div>
+
+  <div class="search-container">
+    <div class="search-box">
+      <svg class="search-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input id="searchInput" type="text" placeholder="Josh Allen 2024 rushing yards..." autocomplete="off" />
+      <button class="ask-btn" id="askBtn" onclick="doSearch()">
+        Ask
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+    <div class="chips">
+      <div class="chip" onclick="fillSearch('Josh Allen 2024 rushing yards')">Josh Allen 2024 rushing yards</div>
+      <div class="chip" onclick="fillSearch('LeBron James 2025 rebounds per game')">LeBron rebounds 2025</div>
+      <div class="chip" onclick="fillSearch('Connor McDavid goals 2025')">McDavid goals 2025</div>
+      <div class="chip" onclick="fillSearch('Patrick Mahomes career touchdowns')">Mahomes career TDs</div>
+      <div class="chip" onclick="fillSearch('Nikola Jokic 2025 assists per game')">Jokic assists 2025</div>
+    </div>
+  </div>
+
+  <div class="result-area" id="resultArea">
+    <div class="loading-state" id="loadingState">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+      <div class="loading-text" id="loadingText">Searching stats...</div>
+    </div>
+    <div class="error-state" id="errorState"></div>
+    <div class="result-card" id="resultCard">
+      <div class="result-header">
+        <div class="result-query">Results for: <strong id="queryDisplay"></strong></div>
+        <div class="league-badge" id="leagueBadge"></div>
+      </div>
+      <div class="result-body">
+        <div class="player-row">
+          <div class="player-avatar" id="playerAvatar"></div>
+          <div>
+            <div class="player-name" id="playerName"></div>
+            <div class="player-meta" id="playerMeta"></div>
+          </div>
+        </div>
+        <div class="stat-grid" id="statGrid"></div>
+        <div class="ai-insight" id="aiInsight" style="display:none">
+          <div class="ai-insight-label">AI Insight</div>
+          <div id="insightText"></div>
+        </div>
+      </div>
+      <div class="result-source">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+        Stats via ESPN Sports API · SportKnow AI
+      </div>
+    </div>
+  </div>
+
+  <div class="history" id="historyList"></div>
+</section>
+
+<section class="how-section">
+  <div class="section-label">Under the hood</div>
+  <div class="section-title">HOW IT WORKS</div>
+  <div class="how-grid">
+    <div class="how-card"><div class="how-num">01</div><h3>You ask a question</h3><p>Type anything — player name, stat type, season — in plain English. No special syntax required.</p></div>
+    <div class="how-card"><div class="how-num">02</div><h3>AI parses your intent</h3><p>Claude AI extracts the player, sport, stat type, and season from your natural language query.</p></div>
+    <div class="how-card"><div class="how-num">03</div><h3>Stats API fetches data</h3><p>We hit live ESPN and sports data APIs to pull the most accurate, up-to-date numbers available.</p></div>
+    <div class="how-card"><div class="how-num">04</div><h3>You get clean answers</h3><p>Results display in a clean stat card with context and an AI-generated insight about the numbers.</p></div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">Sport<span>Know</span></div>
+  <div class="footer-links">
+    <a href="#">NFL</a><a href="#">NBA</a><a href="#">NHL</a><a href="#">About</a>
+  </div>
+</footer>
+
+<script>
+  let activeLeague = 'NFL';
+  let searchHistory = [];
+
+  const placeholders = {
+    NFL: 'Josh Allen 2024 rushing yards...',
+    NBA: 'LeBron James 2025 rebounds per game...',
+    NHL: 'Connor McDavid 2025 goals...'
+  };
+
+  function setLeague(league, el) {
+    activeLeague = league;
+    document.querySelectorAll('.nav-league, .league-tab').forEach(b => {
+      b.classList.remove('active');
+    });
+    document.querySelectorAll(`.nav-league.${league.toLowerCase()}, .league-tab.${league.toLowerCase()}`).forEach(b => {
+      b.classList.add('active');
+    });
+    document.getElementById('searchInput').placeholder = placeholders[league];
+  }
+
+  function fillSearch(text) {
+    document.getElementById('searchInput').value = text;
+    doSearch();
+  }
+
+  function showLoading(msg) {
+    document.getElementById('loadingState').classList.add('show');
+    document.getElementById('loadingText').textContent = msg || 'Searching stats...';
+    document.getElementById('resultCard').classList.remove('show');
+    document.getElementById('errorState').classList.remove('show');
+  }
+
+  function hideLoading() {
+    document.getElementById('loadingState').classList.remove('show');
+  }
+
+  function showError(msg) {
+    hideLoading();
+    const el = document.getElementById('errorState');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  // Calls YOUR secure Netlify function (no exposed API key)
+  async function callClaude(payload) {
+    const res = await fetch('/.netlify/functions/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    return res.json();
+  }
+
+  async function doSearch() {
+    const q = document.getElementById('searchInput').value.trim();
+    if (!q) return;
+
+    const btn = document.getElementById('askBtn');
+    btn.disabled = true;
+
+    if (!searchHistory.includes(q)) {
+      searchHistory.unshift(q);
+      if (searchHistory.length > 5) searchHistory.pop();
+      renderHistory();
+    }
+
+    showLoading('Parsing your question...');
+
+    try {
+      const parseResult = await parseQueryWithClaude(q);
+      if (!parseResult) {
+        showError('Could not understand that question. Try: "Josh Allen 2024 rushing yards"');
+        btn.disabled = false;
+        return;
+      }
+
+      document.getElementById('loadingText').textContent = `Fetching ${parseResult.player} stats...`;
+
+      const statsResult = await fetchStats(parseResult);
+      if (!statsResult) {
+        showError('Could not find stats for that player. Try a different query.');
+        btn.disabled = false;
+        return;
+      }
+
+      displayResult(q, parseResult, statsResult);
+
+    } catch(e) {
+      showError('Something went wrong. Please try again.');
+      console.error(e);
+    }
+
+    btn.disabled = false;
+  }
+
+  async function parseQueryWithClaude(query) {
+    const data = await callClaude({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: `You are a sports stats assistant. Extract structured info from a user's natural language sports question.
+Return ONLY a JSON object with these fields:
+- player: full player name (string)
+- sport: one of "NFL", "NBA", "NHL"
+- statType: the primary stat being asked about
+- season: year or "career" (e.g. "2024", "2024-25", "career")
+- searchQuery: clean ESPN search string
+
+Infer sport from player name if not specified. Return ONLY valid JSON, no markdown.`,
+      messages: [{ role: 'user', content: `Active league: ${activeLeague}\nQuestion: ${query}` }]
+    });
+
+    const text = data.content?.[0]?.text || '';
+    try { return JSON.parse(text.replace(/```json|```/g,'').trim()); }
+    catch(e) { return null; }
+  }
+
+  async function fetchStats(parsed) {
+    const sportMap = { NFL: 'football/nfl', NBA: 'basketball/nba', NHL: 'hockey/nhl' };
+    const sport = sportMap[parsed.sport] || sportMap[activeLeague];
+
+    try {
+      const searchRes = await fetch(`https://site.api.espn.com/apis/common/v3/search?query=${encodeURIComponent(parsed.player)}&limit=5&type=athlete&sport=${sport}`);
+      const searchData = await searchRes.json();
+      const athlete = searchData?.athletes?.[0]?.athlete || searchData?.results?.[0];
+
+      if (athlete) {
+        const athleteId = athlete.id || athlete.uid?.split(':').pop();
+        if (athleteId) {
+          const statsRes = await fetch(`https://site.web.api.espn.com/apis/common/v3/sports/${sport}/athletes/${athleteId}/stats`);
+          const statsData = await statsRes.json();
+          if (statsData?.athlete) {
+            const formatted = formatESPNStats(statsData, parsed);
+            if (formatted) return formatted;
+          }
+        }
+      }
+    } catch(e) { /* fall through to AI */ }
+
+    return fetchStatsViaAI(parsed);
+  }
+
+  function formatESPNStats(data, parsed) {
+    const athlete = data.athlete;
+    const categories = data.stats?.splits?.categories || [];
+    let stats = [];
+    for (const cat of categories) {
+      for (const stat of (cat.stats || [])) {
+        stats.push({ label: stat.shortDisplayName || stat.displayName || stat.name, val: stat.displayValue || String(stat.value), sub: parsed.season });
+      }
+    }
+    stats = stats.slice(0, 6);
+    if (stats.length === 0) return null;
+    return {
+      player: athlete.displayName || parsed.player,
+      initials: getInitials(athlete.displayName || parsed.player),
+      team: athlete.team?.displayName || '',
+      position: athlete.position?.displayName || '',
+      season: parsed.season,
+      sport: parsed.sport,
+      stats,
+      source: 'ESPN'
+    };
+  }
+
+  async function fetchStatsViaAI(parsed) {
+    const data = await callClaude({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: `You are a sports stats database. Return ONLY a JSON object. Be accurate with real stats from your knowledge.
+
+{
+  "player": "Full Name",
+  "initials": "XX",
+  "team": "Team Name",
+  "position": "Position",
+  "season": "season string",
+  "sport": "NFL/NBA/NHL",
+  "stats": [
+    {"label": "STAT NAME", "val": "value", "sub": "context", "highlight": true},
+    ... (4-6 total)
+  ],
+  "insight": "One sentence insight about these stats in context of the player's career"
+}
+
+Return ONLY valid JSON, no markdown, no explanation.`,
+      messages: [{ role: 'user', content: `Player: ${parsed.player}\nSport: ${parsed.sport}\nFocus: ${parsed.statType}\nSeason: ${parsed.season}` }]
+    });
+
+    const text = data.content?.[0]?.text || '';
+    try { return JSON.parse(text.replace(/```json|```/g,'').trim()); }
+    catch(e) { return null; }
+  }
+
+  function displayResult(originalQuery, parsed, result) {
+    hideLoading();
+    document.getElementById('queryDisplay').textContent = originalQuery;
+
+    const league = (result.sport || parsed.sport || activeLeague).toUpperCase();
+    const badgeEl = document.getElementById('leagueBadge');
+    badgeEl.textContent = league;
+    badgeEl.className = `league-badge badge-${league.toLowerCase()}`;
+
+    const avatarEl = document.getElementById('playerAvatar');
+    avatarEl.textContent = result.initials || getInitials(result.player);
+    avatarEl.className = `player-avatar avatar-${league.toLowerCase()}`;
+
+    document.getElementById('playerName').textContent = result.player;
+    document.getElementById('playerMeta').textContent =
+      [result.team, result.position, result.season ? `${result.season} Season` : ''].filter(Boolean).join(' · ');
+
+    document.getElementById('statGrid').innerHTML = (result.stats || []).map((s, i) => `
+      <div class="stat-card">
+        <div class="stat-label">${s.label}</div>
+        <div class="stat-val${s.highlight || i === 0 ? ' accent' : ''}">${s.val}</div>
+        ${s.sub ? `<div class="stat-sub">${s.sub}</div>` : ''}
+      </div>
+    `).join('');
+
+    const insightEl = document.getElementById('aiInsight');
+    if (result.insight) {
+      document.getElementById('insightText').textContent = result.insight;
+      insightEl.style.display = 'block';
+    } else {
+      insightEl.style.display = 'none';
+    }
+
+    document.getElementById('resultCard').classList.add('show');
+  }
+
+  function getInitials(name) {
+    if (!name) return '??';
+    return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  function renderHistory() {
+    const el = document.getElementById('historyList');
+    el.innerHTML = searchHistory.slice(1).map(q => `
+      <div class="history-item" onclick="fillSearch('${q.replace(/'/g,"\\'")}')">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        ${q}
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('searchInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doSearch();
+  });
+</script>
+</body>
+</html>
