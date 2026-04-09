@@ -16,7 +16,7 @@
   body::before{content:"";position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.4}
   body::after{content:"";position:fixed;inset:0;background-image:linear-gradient(rgba(79,142,247,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(79,142,247,0.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
   nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(15,15,22,0.95);backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,0.1);padding:0 40px;height:120px;display:flex;align-items:center;justify-content:space-between}
-  .nav-logo{height:90px;width:auto;object-fit:contain;filter:drop-shadow(0 0 12px rgba(79,142,247,0.2))}
+  .nav-logo{height:98px;width:auto;object-fit:contain;filter:drop-shadow(0 0 12px rgba(79,142,247,0.2))}
   .nav-status{display:flex;align-items:center;gap:8px;font-size:15px;color:var(--text2);font-weight:500;letter-spacing:0.5px}
   .status-dot{width:10px;height:10px;border-radius:50%;background:#3fba74;box-shadow:0 0 10px #3fba74,0 0 20px rgba(63,186,116,0.4);animation:pulse 2s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
@@ -133,7 +133,7 @@
 <section class="hero">
   <div class="hero-eyebrow">AI-Powered Sports Intelligence</div>
   <h1 class="hero-title">ASK <span class="accent">ANY</span><span class="dim">THING</span></h1>
-  <p class="hero-sub">Ask about any NFL, NBA, or NHL player, team, or ranking — stats, records, leaders, career numbers — instant answers.</p>
+  <p class="hero-sub">Get instant, accurate stats across NFL, NBA, and NHL. No searching, no guessing.</p>
 
   <div class="search-container">
     <div class="search-box">
@@ -144,13 +144,7 @@
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </button>
     </div>
-    <div class="chips">
-      <div class="chip" onclick="fillSearch('Top 5 NFL passing yards leaders 2024')">Top 5 NFL passing yards 2024</div>
-      <div class="chip" onclick="fillSearch('Panthers 2022 rushing yards leader')">Panthers 2022 rushing leader</div>
-      <div class="chip" onclick="fillSearch('LeBron James career points')">LeBron career points</div>
-      <div class="chip" onclick="fillSearch('Top 3 NHL goal scorers 2025')">Top 3 NHL goal scorers 2025</div>
-      <div class="chip" onclick="fillSearch('Chiefs 2024 season record')">Chiefs 2024 season record</div>
-    </div>
+    <div class="chips" id="chipsContainer"></div>
   </div>
 
   <div class="result-area" id="resultArea">
@@ -429,6 +423,119 @@
   }
 
   document.getElementById("searchInput").addEventListener("keydown", function(e) { if (e.key === "Enter") doSearch(); });
+
+  var allChips = [
+    "Chiefs 2024 rushing yards leader",
+    "Steve Largent career stats",
+    "Cam Newton highest passing yards in a game",
+    "Julian Edelman Super Bowl stats",
+    "Josh Allen 2024 rushing yards",
+    "LeBron James career points",
+    "Connor McDavid 2025 goals",
+    "Patrick Mahomes career touchdowns",
+    "Top 5 NFL passing yards leaders 2024",
+    "Nikola Jokic 2025 assists per game",
+    "Tyreek Hill 2024 receiving yards",
+    "Aaron Donald career sacks",
+    "Stephen Curry career three pointers",
+    "Auston Matthews 2025 goals",
+    "Travis Kelce career receiving yards",
+    "Giannis Antetokounmpo 2025 points per game",
+    "Nathan MacKinnon 2025 points",
+    "Top 3 NHL goal scorers 2025",
+    "Celtics 2024 season record",
+    "Eagles 2024 rushing yards",
+    "Barry Sanders career rushing yards",
+    "Jerry Rice career touchdowns",
+    "Wayne Gretzky career goals",
+    "Wilt Chamberlain career scoring average",
+    "Bo Jackson career stats",
+    "Deion Sanders career interceptions",
+    "Dick Butkus career stats",
+    "Lawrence Taylor career sacks",
+    "Walter Payton career rushing yards",
+    "Reggie White career sacks",
+    "Michael Jordan career points",
+    "Larry Bird career assists",
+    "Magic Johnson career assists",
+    "Shaquille O'Neal career stats",
+    "Kobe Bryant career points",
+    "Dirk Nowitzki career stats",
+    "Mario Lemieux career goals",
+    "Gordie Howe career points",
+    "Bobby Orr career assists",
+    "Guy Lafleur career stats",
+    "Eric Lindros career stats",
+    "Mark Messier career points",
+    "Brett Favre career touchdowns",
+    "Dan Marino career passing yards",
+    "Joe Montana career stats",
+    "John Elway career passing yards",
+    "Emmitt Smith career rushing yards",
+    "Randy Moss career receiving yards",
+    "Terrell Owens career touchdowns",
+    "Tony Gonzalez career receptions",
+    "Top 5 NBA scorers 2025",
+    "Lakers 2024 win loss record",
+    "Bills 2024 season stats",
+    "Top 5 NHL assists 2025",
+    "Top 3 NFL rushing leaders 2024",
+    "Jayson Tatum 2025 stats",
+    "Luka Doncic 2025 points per game",
+    "Joel Embiid career stats",
+    "Kevin Durant career points",
+    "Steph Curry 2025 three pointers",
+    "Tua Tagovailoa 2024 passing yards",
+    "CeeDee Lamb 2024 receiving yards",
+    "Davante Adams career receiving touchdowns",
+    "Justin Jefferson 2024 stats",
+    "Lamar Jackson 2024 rushing yards",
+    "Jalen Hurts 2024 stats",
+    "Brock Purdy 2024 passing yards",
+    "Christian McCaffrey career stats",
+    "Derrick Henry 2024 rushing yards",
+    "Nick Chubb career rushing yards",
+    "Mitchell Marner 2025 assists",
+    "David Pastrnak 2025 goals",
+    "Leon Draisaitl career stats",
+    "Sidney Crosby career points",
+    "Alex Ovechkin career goals",
+    "Nikita Kucherov 2025 points",
+    "Panthers 2022 rushing yards leader",
+    "Ravens 2024 passing stats",
+    "49ers 2024 season record",
+    "Cowboys 2024 rushing yards leader",
+    "Nuggets 2024 season record",
+    "Heat 2024 playoff stats",
+    "Bruins 2024 goals scored",
+    "Avalanche 2024 season stats",
+    "Joe Namath career passing yards",
+    "Jim Brown career rushing yards",
+    "Franco Harris career stats",
+    "Lynn Swann Super Bowl stats",
+    "John Stallworth career stats",
+    "Ronnie Lott career interceptions",
+    "Mike Singletary career stats",
+    "Charles Barkley career rebounds",
+    "Hakeem Olajuwon career blocks",
+    "Patrick Ewing career stats",
+    "Scottie Pippen career assists",
+    "Dominique Wilkins career points",
+    "Phil Esposito career goals",
+    "Mike Bossy career goals",
+    "Cam Neely career stats",
+    "Pat Lafontaine career points"
+  ];
+
+  function randomChips() {
+    var shuffled = allChips.slice().sort(function() { return Math.random() - 0.5; });
+    var picked = shuffled.slice(0, 5);
+    var container = document.getElementById("chipsContainer");
+    container.innerHTML = picked.map(function(q) {
+      return '<div class="chip" onclick="fillSearch('' + q.replace(/'/g, "\'") + '')">' + q + '</div>';
+    }).join("");
+  }
+  randomChips();
 </script>
 </body>
 </html>
