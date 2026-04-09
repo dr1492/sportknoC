@@ -532,7 +532,7 @@
     var picked = shuffled.slice(0, 5);
     var container = document.getElementById("chipsContainer");
     container.innerHTML = picked.map(function(q) {
-      return '<div class="chip" onclick="fillSearch('' + q.replace(/'/g, "\'") + '')">' + q + '</div>';
+      return '<div class="chip" onclick="fillSearch(\'' + q.replace(/'/g, "\\'") + '\')">' + q + '</div>';
     }).join("");
   }
   randomChips();
