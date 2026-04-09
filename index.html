@@ -59,6 +59,7 @@
   .badge-nfl{background:rgba(212,56,13,0.2);color:var(--nfl);border:1px solid rgba(212,56,13,0.3)}
   .badge-nba{background:rgba(201,162,39,0.2);color:var(--nba);border:1px solid rgba(201,162,39,0.3)}
   .badge-nhl{background:rgba(58,159,212,0.2);color:var(--nhl);border:1px solid rgba(58,159,212,0.3)}
+  .badge-mlb{background:rgba(198,50,50,0.2);color:#c63232;border:1px solid rgba(198,50,50,0.3)}
   .result-body{padding:20px}
   .player-row{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--border)}
   .player-avatar{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:22px;flex-shrink:0;overflow:hidden;position:relative}
@@ -67,6 +68,7 @@
   .avatar-nfl{background:rgba(212,56,13,0.2);color:var(--nfl);border:2px solid rgba(212,56,13,0.4)}
   .avatar-nba{background:rgba(201,162,39,0.2);color:var(--nba);border:2px solid rgba(201,162,39,0.4)}
   .avatar-nhl{background:rgba(58,159,212,0.2);color:var(--nhl);border:2px solid rgba(58,159,212,0.4)}
+  .avatar-mlb{background:rgba(198,50,50,0.2);color:#c63232;border:2px solid rgba(198,50,50,0.4)}
   .player-name{font-size:20px;font-weight:600;color:var(--text)}
   .player-meta{font-size:13px;color:var(--text2);margin-top:2px}
   .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
@@ -133,7 +135,7 @@
 <section class="hero">
   <div class="hero-eyebrow">AI-Powered Sports Intelligence</div>
   <h1 class="hero-title">ASK <span class="accent">ANY</span><span class="dim">THING</span></h1>
-  <p class="hero-sub">Get instant, accurate stats across NFL, NBA, and NHL. No searching, no guessing.</p>
+  <p class="hero-sub">Get instant, accurate stats across NFL, NBA, NHL, and MLB. No searching, no guessing.</p>
 
   <div class="search-container">
     <div class="search-box">
@@ -263,7 +265,7 @@
     var data = await callClaude({
       model: "claude-sonnet-4-20250514",
       max_tokens: 600,
-      system: "You are a sports query parser. Classify the user question and extract info. Return ONLY a JSON object with these fields:\n- type: \"player\" (single player stats), \"list\" (rankings/leaderboards/top N), or \"team\" (team stats/record)\n- sport: \"NFL\", \"NBA\", or \"NHL\" (infer from context)\n- season: e.g. \"2024\", \"2024-25\", \"career\"\n- statType: what stat is being asked about\n- player: (only for type=player) full player name\n- team: (only for type=team) full team name\n- listTitle: (only for type=list) e.g. \"Top 5 NFL Passing Yards Leaders 2024\"\n- count: (only for type=list) how many results, default 5\nReturn ONLY valid JSON, no markdown.",
+      system: "You are a sports query parser. Classify the user question and extract info. Return ONLY a JSON object with these fields:\n- type: \"player\" (single player stats), \"list\" (rankings/leaderboards/top N), or \"team\" (team stats/record)\n- sport: \"NFL\", \"NBA\", \"NHL\", or \"MLB\" (infer from context)\n- season: e.g. \"2024\", \"2024-25\", \"career\"\n- statType: what stat is being asked about\n- player: (only for type=player) full player name\n- team: (only for type=team) full team name\n- listTitle: (only for type=list) e.g. \"Top 5 NFL Passing Yards Leaders 2024\"\n- count: (only for type=list) how many results, default 5\nReturn ONLY valid JSON, no markdown.",
       messages: [{ role: "user", content: "Question: " + query }]
     });
     var text = (data.content && data.content[0]) ? data.content[0].text : "";
@@ -279,7 +281,7 @@
   }
 
   async function fetchPlayerStats(parsed) {
-    var sportMap = { NFL: "football/nfl", NBA: "basketball/nba", NHL: "hockey/nhl" };
+    var sportMap = { NFL: "football/nfl", NBA: "basketball/nba", NHL: "hockey/nhl", MLB: "baseball/mlb" };
     var sport = sportMap[parsed.sport] || "football/nfl";
     try {
       var sr = await fetch("https://site.api.espn.com/apis/common/v3/search?query=" + encodeURIComponent(parsed.player) + "&limit=5&type=athlete&sport=" + sport);
@@ -458,7 +460,7 @@
     "Michael Jordan career points",
     "Larry Bird career assists",
     "Magic Johnson career assists",
-    "Shaquille O'Neal career stats",
+    "Shaquille ONeal career stats",
     "Kobe Bryant career points",
     "Dirk Nowitzki career stats",
     "Mario Lemieux career goals",
@@ -532,7 +534,7 @@
     var picked = shuffled.slice(0, 5);
     var container = document.getElementById("chipsContainer");
     container.innerHTML = picked.map(function(q) {
-      return '<div class="chip" onclick="fillSearch(\'' + q.replace(/'/g, "\\'") + '\')">' + q + '</div>';
+      return "<div class=\"chip\" onclick=\"fillSearch(this.dataset.q)\" data-q=\"" + q + "\">" + q + "</div>";
     }).join("");
   }
   randomChips();
