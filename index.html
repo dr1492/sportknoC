@@ -631,5 +631,14 @@
     <button class="modal-close" onclick="closeAbout()">Close</button>
   </div>
 </div>
+
+<div id="cookieBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;background:rgba(20,20,30,0.97);border-top:1px solid rgba(255,255,255,0.1);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;font-family:'DM Sans',sans-serif">
+  <span style="font-size:13px;color:#9090b0">We use cookies for analytics. By using SportKnow you agree to our <a href="/privacy.html" style="color:#4f8ef7;text-decoration:none">Privacy Policy</a>.</span>
+  <button onclick="dismissCookie()" style="background:transparent;border:1px solid rgba(255,255,255,0.2);color:#9090b0;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:12px;white-space:nowrap;font-family:'DM Sans',sans-serif">Got it</button>
+</div>
+<script>
+  if(!localStorage.getItem('cookieOk')){document.getElementById('cookieBanner').style.display='flex';}
+  function dismissCookie(){localStorage.setItem('cookieOk','1');document.getElementById('cookieBanner').style.display='none';}
+</script>
 </body>
 </html>
